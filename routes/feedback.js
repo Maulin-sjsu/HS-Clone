@@ -2,6 +2,11 @@ const express = require('express')
 
 const{check,validationResult} = require('express-validator');
 
+const validations = [check('name').trim().isLength({min: 3}).escape().withMessage('A name is required'),
+check('email').trim().isEmail().normalizeEmail().withMessage('A Valid Email address is required'),
+check('title').trim().isLength({min: 3}).escape().withMessage('A Title is required'),
+check('message').trim().isLength({min: 5}).escape().withMessage('A Message is required')]
+
 const router = express.Router()
 
 
@@ -28,11 +33,7 @@ module.exports = (params)=>{
        
 });
 
-    router.post('/',[check('name').trim().isLength({min: 3}).escape().withMessage('A name is required'),
-                     check('email').trim().isEmail().normalizeEmail().withMessage('A Valid Email address is required'),
-                     check('title').trim().isLength({min: 3}).escape().withMessage('A Title is required'),
-                     check('message').trim().isLength({min: 5}).escape().withMessage('A Message is required')],
-                     async (req,res,next)=>{
+    router.post('/',validations, async (req,res,next)=>{
         try{
             const errors = validationResult(req);
 
@@ -51,7 +52,7 @@ module.exports = (params)=>{
 
 
             return res.redirect('/feedback')
-            //return res.send('Feedback form Posted');
+
         }catch(err)
         {
             return next(err);
@@ -59,6 +60,31 @@ module.exports = (params)=>{
 
     
 });
+
+router.post('/api',validations, async (req,res,next)=>{
+    try{
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty())
+        {
+            return res.json({errors: errors.array()});
+        }
+        const {name,email,title,message} = req.body;
+        await feedbackService.addEntry(name, email, title, message);
+        const feedback = await feedbackService.getList();
+        return res.json({feedback,successMessage: 'Thank you for your FeedBack'})
+
+    }catch(err)
+    {
+        return next(err);
+    }
+
+
+});
+
+
+
+
 
 return router;
 };
