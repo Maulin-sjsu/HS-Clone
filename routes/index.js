@@ -14,7 +14,12 @@ const router = express.Router()
 
 
 module.exports = (params)=>{
-    router.get('/',(req,res)=>{
+
+    const {speakersService} = params;
+
+    router.get('/',async (req,res)=>{
+
+        const topSpeakers = await speakersService.getList();
 
         // if(!req.session.visitcount){
         //     req.session.visitcount = 0;
@@ -23,7 +28,7 @@ module.exports = (params)=>{
         // console.log('Number of Visits : '+ req.session.visitcount);
 
     // res.sendFile(path.join(__dirname,'./static/index.html'))
-    res.render('layouts',{pageTitle: 'Welcome',template: 'index'})
+    res.render('layouts',{pageTitle: 'Welcome',template: 'index', topSpeakers})
 });
 
 router.use('/speakers', speakersRoute(params))
