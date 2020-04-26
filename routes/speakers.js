@@ -7,13 +7,25 @@ module.exports = (params)=>{
 
     const {speakersService} = params;
 
-    router.get('/',async (req,res)=>{
-        const speakers = await speakersService.getList();
-    return res.json(speakers);
+    router.get('/',async (req,res,next)=>{
+        try{
+            const artwork = await speakersService.getAllArtwork();        
+            const speakers = await speakersService.getList();
+            return res.render('layouts',{pageTitle: 'Speakers',template: 'speakers', speakers,artwork})
+        }catch(err){
+            return next(err);
+        }
+        
 });
 
-    router.get('/:shortname',(req,res)=>{
-    return res.send('Detailed Page of : '+ req.params.shortname)
+    router.get('/:shortname',async (req,res,next)=>{
+        try{
+            const speakers = await speakersService.getSpeaker(req.params.shortname);
+            const artwork = await speakersService.getArtworkForSpeaker(req.params.shortname);
+            return res.render('layouts',{pageTitle: 'Speakers',template: 'speakers-detail', speakers,artwork})
+        }catch(err){
+            return next(err);
+        }
 });
 
 return router;

@@ -17,10 +17,16 @@ module.exports = (params)=>{
 
     const {speakersService} = params;
 
-    router.get('/',async (req,res)=>{
+    router.get('/',async (req,res,next) => {
 
-        const topSpeakers = await speakersService.getList();
-
+        try{
+            const artwork = await speakersService.getAllArtwork();
+            const topSpeakers = await speakersService.getList();
+            return res.render('layouts',{pageTitle: 'Welcome',template: 'index', topSpeakers, artwork})
+        }catch(err){
+            return next(err)
+        }
+        
         // if(!req.session.visitcount){
         //     req.session.visitcount = 0;
         // }
@@ -28,7 +34,7 @@ module.exports = (params)=>{
         // console.log('Number of Visits : '+ req.session.visitcount);
 
     // res.sendFile(path.join(__dirname,'./static/index.html'))
-    res.render('layouts',{pageTitle: 'Welcome',template: 'index', topSpeakers})
+    
 });
 
 router.use('/speakers', speakersRoute(params))
